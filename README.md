@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @dhphuoc
-- 💞️ Toàn Bộ Tool Share By: DHP07 ...
-- 🌺 Nghiêm Cấm Cầm Tool Free Đi Bán ...
+- 💞️ Toàn Bộ Tool Share By: DHP07
+- 🌺 Nghiêm Cấm Cầm Tool Free Đi Bán
 - 🐢 Thắc Mắc Vui Lòng Liên Hệ DHP07
 - ✉ Facebook: https://www.facebook.com/dhphuoc.207/
 <!---
