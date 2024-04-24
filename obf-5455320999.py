@@ -1,8 +1,6 @@
 import requests, os, sys, datetime
 from time import sleep
 
-os.system("cls" if os.name == "nt" else "clear")
-
 def main():
     os.system("cls" if os.name == "nt" else "clear")
     count = 0
@@ -16,77 +14,62 @@ def main():
         tokenfb_list = open(file_token_page).readlines()
     except:
         exit()
-
     for line in tokenfb_list:
         count += 1
     print(f'TÌM THẤY {count} TOKEN PAGE')
-
     file_uid_page = input('NHẬP FILE UID PAGE: ')
     try:
         idfb_list = open(file_uid_page).readlines()
     except:
         exit()
-
     for line in idfb_list:
         count1 += 1
     print(f'TÌM THẤY {count1} UID PAGE')
-
     stop = int(input('NHẬP SỐ NHIỆM VỤ: '))
     stop_block = int(input('NHẬP SỐ LẦN VƯỢT BLOCK: '))
     accounts_count = len(tokenfb_list)
     tasks_per_account = 1
     task_count = 0
     success_count = 0
-
     while success_count < stop:
         for account_index in range(accounts_count):
             if success_count >= stop:
                 break
-
             tokenfb = tokenfb_list[account_index].strip()
             idfb = idfb_list[account_index].strip()
-
             os.system("cls" if os.name == "nt" else "clear")
             fb = requests.get('https://graph.facebook.com/me/?access_token='+str(tokenfb))
-
             if 'id' in fb.text and 'name' in fb.text:
                 print(f"[ĐANG CẤU HÌNH: {str(fb.json()['name'].upper())} ID: {str(fb.json()['id'])}]")
             else:
                 print(fb.json()["error"]["message"])
                 quit()
-
             run = requests.get('https://traodoisub.com/api/?fields=run&id='+str(idfb)+'&access_token='+str(token_tds))
             if 'success' in run.text:
                 print(run.json()['data']["msg"].upper())
             else:
                 print(run.json()['error'].upper())
                 quit()
-
             for task_index in range(1, tasks_per_account + 1):
                 if success_count >= stop:
                     break
-
                 time = datetime.datetime.now().strftime("%H:%M:%S")
                 while True:
                     listlike = requests.get('https://traodoisub.com/api/?fields=likesieure&access_token='+str(token_tds))
                     if 'id' in listlike.text:
                         break
-
                 snv = len(listlike.json())
                 s += snv
                 tsnv = s
                 print(f'TÀI KHOẢN {account_index+1}/{accounts_count} - TÌM THẤY [{str(snv)}] NHIỆM VỤ [{time}]')
-
                 for i in range(0, len(listlike.json()), 1):
                     if success_count >= stop:
                         break
-
                     dem_so_nv = tsnv - snv + i + 1
                     id_post = listlike.json()[i]['id']
                     urllike = 'https://graph.facebook.com/'+str(id_post)+'/likes'
                     datalike = 'access_token=' + str(tokenfb)
                     like = requests.post(urllike, data=datalike)
-
                     if like.text == 'true':
                         pass
                     if 'error' in like.text and '368' in like.text:
@@ -103,27 +86,22 @@ def main():
                         pass
                     if dem_so_nv == stop:
                         break
-
                 if block == stop_block:
                     break
                 if dem_so_nv == stop:
                     break
                 if 'error' in like.text and '190' in like.text:
                     break
-
                 for delay in range(3, 0, -1):
                     print(f'[DHP07] ĐANG GET LIST NHIỆM VỤ, ĐỢI: {delay}')
                     sleep(0.7)
-
                 task_count += 1
                 if task_count >= 10:
                     success_count += 1
                     task_count = 0
                     break
-
             if success_count >= stop:
                 break
-
         ttacc = requests.get('https://traodoisub.com/api/?fields=profile&access_token='+str(token_tds)).json()
         print(f"TỔNG XU CỦA TÀI KHOẢN HIỆN TẠI: {str(ttacc['data']['xu'])}")
 
