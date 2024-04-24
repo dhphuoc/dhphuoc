@@ -33,10 +33,10 @@ def main():
             os.system("cls" if os.name == "nt" else "clear")
             fb = requests.get('https://graph.facebook.com/me/?access_token='+str(tokenfb))
             if 'id' in fb.text and 'name' in fb.text:print(f"[ĐANG CẤU HÌNH: {str(fb.json()['name'].upper())} ID: {str(fb.json()['id'])}]")
-            else:print(fb.json()["error"]["message"]);continue
+            else:print(fb.json()["error"]["message"]),quit()
             run = requests.get('https://traodoisub.com/api/?fields=run&id='+str(idfb)+'&access_token='+str(tokentds))
             if 'success' in run.text:print(run.json()['data']["msg"].upper())
-            else:print(run.json()['error'].upper());continue
+            else:print(run.json()['error'].upper()),quit()
             for task_index in range(1, tasks_per_account + 1):
                 time = datetime.datetime.now().strftime("%H:%M:%S")
                 while True:
