@@ -11,7 +11,7 @@ for i in range(sopage):
     TOKEN.append({'token': token})
     uid = input(f"NHẬP UID PAGE THỨ {luot}: ")
     UID.append({'uid': uid})
-print('1 <> LIKE | 2 <> FOLLOW | 3 <> REACTION(COMING SOON) | 4 <> SHARE(COMING SOON) | 5 <> COMENT(COMING SOON) | 6 <> JOIN GROUP(COMING SOON) |')
+print('1 <> LIKE | 2 <> FOLLOW | 3 <> REACTION(COMING SOON) | 4 <> SHARE(COMING SOON) | 5 <> COMENT(COMING SOON) |')
 chon = input('CHỌN NHIỆM VỤ: ')
 class Api:
     def __init__(self, token):
