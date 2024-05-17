@@ -64,7 +64,6 @@ if chon == '1':
             type = 'LIKESIEURE'
             dem+=1
             nhanx = nhanxu(dem, type, idnv, tokentds)
-            sleep(20)
             if likes == True:
                 sonvlam += 1
             if count == 10:
@@ -89,7 +88,6 @@ elif chon == '2':
             type = 'FOLLOW'
             dem+=1
             nhanx = nhanxu(dem, type, idnv, tokentds)
-            sleep(20)
             if fl == True:
                 sonvlam += 1
             if count == 10:
