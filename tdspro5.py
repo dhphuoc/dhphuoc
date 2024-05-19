@@ -25,15 +25,6 @@ class Api:
         datalike = 'access_token='+str(self.token)
         like = requests.post(urllike, data=datalike)
         if like.text=='true':pass
-    def Share(self, idnv):
-        share=requests.post(f'https://graph.facebook.com/me/feed?method=POST&link=https://www.facebook.com/{idnv}&access_token={self.token}')
-        if share.json()=='true':pass
-    def Reaction(self, idnv, type_post):
-        reac = requests.post(f'https://graph.facebook.com/{idnv}/reactions?type={type_post}&access_token={self.token}')
-        if reac.json()=='true':pass
-    def Comment(self, idnv, noidung):
-        cmt = requests.post(f'https://graph.facebook.com/{idnv}/comments?access_token={self.token}&message={noidung}')
-        if cmt.json()=='true':pass
 def datcauhinh(uid):
     res = requests.get(f"https://traodoisub.com/api/?fields=run&id={uid}&access_token={tokentds}").json()
     if 'success' in res:
@@ -105,39 +96,6 @@ elif chon == '2':
                 print(f'[DELAY][   X ][{x}]','     ',end='\r');sleep(1/6)
                 print(f'[DELAY][    X][{x}]','     ',end='\r');sleep(1/6)
             if fl == True:
-                sonvlam += 1
-            if count == 10:
-                continue
-elif chon == '3':
-    for tokens, ids in zip(TOKEN, UID):
-        token = tokens['token'].strip("\n")
-        uid = ids['uid'].strip("\n")
-        print(f'ĐANG CHẠY UID: {uid}')
-        api = Api(token)
-        datcauhinh(uid)
-        while(True):
-            listshare=requests.get(f'https://traodoisub.com/api/?fields=share&access_token='+str(tokentds))
-            if 'id' in listshare.text:break
-        snv=len(listshare.json())
-        s=s+snv
-        tsnv=s
-        print(f'TÌM THẤY {str(snv)} NHIỆM VỤ SHARE')
-        for i in range(0,len(listshare.json()),1):
-            idnv = listshare.json()[i]['id']
-            se = api.Share(idnv)
-            type = 'SHARE'
-            dem+=1
-            nhanx = nhanxu(dem, type, idnv, tokentds)
-            for i in range(delay, -1, -1):
-                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
-                sleep(0.25)
-                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
-                sleep(0.25)
-                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
-                sleep(0.25)
-                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
-                sleep(0.25)
-            if se == True:
                 sonvlam += 1
             if count == 10:
                 continue
