@@ -11,7 +11,8 @@ for i in range(sopage):
     TOKEN.append({'token': token})
     uid = input(f"NHẬP UID PAGE THỨ {luot}: ")
     UID.append({'uid': uid})
-print('1 <> LIKE | 2 <> FOLLOW | 3 <> REACTION(COMING SOON) | 4 <> SHARE(COMING SOON) | 5 <> COMENT(COMING SOON) |')
+delay = int(input('NHẬP DELAY: '))
+print('| 1 <> LIKE | 2 <> FOLLOW |')
 chon = input('CHỌN NHIỆM VỤ: ')
 class Api:
     def __init__(self, token):
@@ -30,6 +31,9 @@ class Api:
     def Reaction(self, idnv, type_post):
         reac = requests.post(f'https://graph.facebook.com/{idnv}/reactions?type={type_post}&access_token={self.token}')
         if reac.json()=='true':pass
+    def Comment(self, idnv, noidung):
+        cmt = requests.post(f'https://graph.facebook.com/{idnv}/comments?access_token={self.token}&message={noidung}')
+        if cmt.json()=='true':pass
 def datcauhinh(uid):
     res = requests.get(f"https://traodoisub.com/api/?fields=run&id={uid}&access_token={tokentds}").json()
     if 'success' in res:
@@ -43,7 +47,7 @@ def nhanxu(dem,type,idnv,tokentds):
         xu = nhan['data']['xu'];idn = nhan['data']['id'];msg = nhan['data']['msg']
         print(f'| {dem} | {idn} | {msg} | {xu} |')
     else:
-        print(f'| X | BẠN CHƯA LÀM NHIỆM VỤ')
+        print(f'| X | BẠN CHƯA LÀM NHIỆM VỤ', end='\r')
 if chon == '1':
     for tokens, ids in zip(TOKEN, UID):
         token = tokens['token'].strip("\n")
@@ -64,6 +68,12 @@ if chon == '1':
             type = 'LIKESIEURE'
             dem+=1
             nhanx = nhanxu(dem, type, idnv, tokentds)
+            for x in range(delay, -1, -1):
+                print(f'[DELAY][X    ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][ X   ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][  X  ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][   X ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][    X][{x}]','     ',end='\r');sleep(1/6)
             if likes == True:
                 sonvlam += 1
             if count == 10:
@@ -88,7 +98,46 @@ elif chon == '2':
             type = 'FOLLOW'
             dem+=1
             nhanx = nhanxu(dem, type, idnv, tokentds)
+            for x in range(delay, -1, -1):
+                print(f'[DELAY][X    ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][ X   ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][  X  ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][   X ][{x}]','     ',end='\r');sleep(1/6)
+                print(f'[DELAY][    X][{x}]','     ',end='\r');sleep(1/6)
             if fl == True:
+                sonvlam += 1
+            if count == 10:
+                continue
+elif chon == '3':
+    for tokens, ids in zip(TOKEN, UID):
+        token = tokens['token'].strip("\n")
+        uid = ids['uid'].strip("\n")
+        print(f'ĐANG CHẠY UID: {uid}')
+        api = Api(token)
+        datcauhinh(uid)
+        while(True):
+            listshare=requests.get(f'https://traodoisub.com/api/?fields=share&access_token='+str(tokentds))
+            if 'id' in listshare.text:break
+        snv=len(listshare.json())
+        s=s+snv
+        tsnv=s
+        print(f'TÌM THẤY {str(snv)} NHIỆM VỤ SHARE')
+        for i in range(0,len(listshare.json()),1):
+            idnv = listshare.json()[i]['id']
+            se = api.Share(idnv)
+            type = 'SHARE'
+            dem+=1
+            nhanx = nhanxu(dem, type, idnv, tokentds)
+            for i in range(delay, -1, -1):
+                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
+                sleep(0.25)
+                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
+                sleep(0.25)
+                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
+                sleep(0.25)
+                print(f'[DHP07]  DELAY CODE {[i]}  TAKING MISSION      ', end='\r')
+                sleep(0.25)
+            if se == True:
                 sonvlam += 1
             if count == 10:
                 continue
