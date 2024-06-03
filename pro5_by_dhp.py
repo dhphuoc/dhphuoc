@@ -1,149 +1,106 @@
-import requests , time, os, random, re
+import re, requests, time, os, random
 from datetime import date, datetime
+from pystyle import Write, Colors
 from time import sleep
 today = date.today()
 count = 0
 
-os.system('cls' if os.name=='nt' else 'clear')
-if __name__=="__main__":
+os.system('cls' if os.name == 'nt' else 'clear')
+if __name__ == "__main__":
     listjob = []
     listck = []
-    token_tds = input('Nhập Access_token TDS: ')
-    info_tds=requests.get('https://traodoisub.com/api/?fields=profile&access_token='+str(token_tds)).json()
+    token_tds = Write.Input('Nhập Access_token TDS: ', Colors.green_to_yellow, interval=0.0001)
+    info_tds = requests.get('https://traodoisub.com/api/?fields=profile&access_token=' + str(token_tds)).json()
     if 'success' in info_tds:
-        user=info_tds['data']['user']
-        xu=info_tds['data']['xu']
-        xu_die=info_tds['data']['xudie']
+        user = info_tds['data']['user']
+        xu = info_tds['data']['xu']
+        xu_die = info_tds['data']['xudie']
         sleep(1)
-        print(f'User: {user} | Coin: {xu}')
+        Write.Print(f'User: {user} | Coin: {xu} | Coin Die: {xu_die}\n', Colors.green_to_yellow, interval=0.0001)
         sleep(1.5)
-    if 'error' in info_tds:
+    elif 'error' in info_tds:
         print(info_tds['error'])
-    print("""[1] - Like\n[2] - Tham Gia Nhóm\n[3] - Cảm Xúc\n[X] - Chạy Random Job Thì Ngăn cách Bởi Dấu ' + '""")
-    job = str(input('Nhập Job Cần Làm: '))
-    dl1 = int(input('Nhập Delay Min: '))
-    dl2 = int(input('Nhập Delay Max: '))
-    delay = random.randint(dl1,dl2)
-    chuyen = int(input('Sau Bao Nhiêu Job Thì Chuyển: '))
+        exit(1)
+    Write.Print("""
+        [1] - Like Sieu Re
+        [2] - Cảm Xúc
+        [3] - Follow
+        [4] - Share
+        [5] - Tham Gia Nhóm
+        [X] - Chạy Random Job Thì Ngăn cách Bởi Dấu ' + '
+        \n""", Colors.green_to_white, interval=0.0001)
+    job = str(Write.Input('Nhập Job Cần Làm: ', Colors.green_to_white, interval=0.0001))
+    dl1 = int(Write.Input('Nhập Delay Min: ', Colors.green_to_white, interval=0.0001))
+    dl2 = int(Write.Input('Nhập Delay Max: ', Colors.green_to_white, interval=0.0002))
+    chuyen = int(Write.Input('Sau Bao Nhiêu Job Thì Chuyển: ', Colors.green_to_white, interval=0.0002))
+    delay = random.randint(dl1, dl2)
     for i in job.split('+'):
-        if i=='1':listjob.append('like')
-        elif i=='2':listjob.append('gr')
-        elif i=='3':listjob.append('camxuc')
-        else:print('Nhập Sai !'),exit(0)
+        if i == '1':listjob.append('like')
+        elif i == '2':listjob.append('cx')
+        elif i == '3':listjob.append('follow')
+        elif i == '4':listjob.append('page')
+        elif i == '5':listjob.append('share')
+        elif i == '6':listjob.append('gr')
+        else:Write.Print('Nhập Sai !', Colors.green_to_yellow, interval=0.0001);exit()
     for i in range(99999):
-        ck = str(input(f'Nhập Cookie Pro5 Thứ {i+1}: '))
-        if ck == "":
-            break
-        else:
-            listck.append(ck)
-    while (True):
+        ck = str(Write.Input(f'Nhập Cookie Thứ {i + 1}: ', Colors.green_to_yellow, interval=0.0001))
+        if ck == "":break
+        else:listck.append(ck)
+    os.system('cls' if os.name == 'nt' else 'clear')
+    while True:
         for i in range(len(listck)):
-            cookie = listck[i]
+            ck = listck[i]
             head = {
-                'cookie' : cookie,
-                'useragent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
-                }
+                'cookie': ck,
+                'useragent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
+            }
             check = requests.get('https://mbasic.facebook.com/profile.php', headers=head).text
             if 'Đăng nhập Facebook để xem trang cá nhân.' in str(check):
-                print('Cookie Die !')
+                Write.Print('Cookie Die !', Colors.green_to_red, interval=0.0001)
                 continue
             else:
-                uid = cookie.split('i_user=')[1].split(';')[0]
+                uid = ck.split('i_user=')[1].split(';')[0]
                 user = check.split('<title>')[1].split('<')[0]
                 run = requests.get(f'https://traodoisub.com/api/?fields=run&id={uid}&access_token={token_tds}').json()
-                s=0
                 if 'success' in run:
-                    os.system('cls' if os.name=='nt' else 'clear')
-                    print(run['data']["msg"]+f' <> Name: {user} <> Uid: {uid}')
+                    Write.Print(run['data']["msg"] + f' <> Name: {user} <> Uid: {uid} <> Có {len(listck)} Cookie\n', Colors.green_to_red, interval=0.0001)
                 else:
-                    print(run['error']);continue
-            while (True):
+                    print(run['error'])
+                    continue
+            while count < chuyen:
                 jc = random.choice(listjob)
-                if str(jc)=='like':
+                if jc == 'like':
                     try:
                         joblike = requests.get(f'https://traodoisub.com/api/?fields=likesieure&access_token={token_tds}').json()
                         if 'error' in joblike:continue
-                        for i in range(int(len(joblike))):
+                        for job in joblike:
                             try:
-                                id = joblike[i]['id']
+                                id = job['id']
                                 id2 = str(id).split('_')[1]
                                 host = 'https://mbasic.facebook.com'
-                                url = host+'/reactions/picker/?is_permalink=1&ft_id='+str(id2)
-                                head_job = {'cookie': cookie}
+                                url = host + '/reactions/picker/?is_permalink=1&ft_id=' + str(id2)
+                                head_job = {'cookie': ck}
                                 a = requests.get(url, headers=head_job).text
-                                b = re.findall('/ufi/reaction/?.*?"',a)
-                                if b == []:continue
-                                else:
-                                    c = b[0].replace('amp;','').replace('"','')
-                                    url = host+c
-                                    done = requests.get(url=url, headers=head_job)
+                                b = re.findall('/ufi/reaction/?.*?"', a)
+                                if not b:continue
+                                c = b[0].replace('amp;', '').replace('"', '')
+                                url = host + c
+                                done = requests.get(url=url, headers=head_job)
                                 get_xu = requests.get(f'https://traodoisub.com/api/coin/?type=LIKESIEURE&id={id}&access_token={token_tds}').json()
-                                print(get_xu)
-                                if str(get_xu['success'])=='200':
+                                if str(get_xu['success']) == '200':
                                     count += 1
                                     timem = datetime.now().strftime("%H:%M:%S")
                                     xucong = str(get_xu['data']['msg'])
                                     xutong = str(get_xu['data']['xu'])
-                                    print(f'| {count} | {timem} | LIKESIEURE | {id2} | {xucong} | {xutong} |')
-                                    if count > 0 and count % chuyen == 0:
+                                    Write.Print(f'| {count} | {timem} | LIKESIEURE | {id2} | {xucong} | {xutong} |\n', Colors.green_to_white, interval=0.0001)
+                                    if count >= chuyen:
                                         break
-                                else:
-                                    print(f'| X | {timem} | LIKESIEURE | {id2} | {xutong} |', end='\r')
-                                for i in range(delay,0,-1):
-                                    print(f'Làm Job Tiếp Theo Sau {i} Giây', end='\r')
+                                for t in range(delay, 0, -1):
+                                    Write.Print(f'Làm Job Tiếp Theo Sau {t} Giây \r', Colors.green_to_white, interval=0.0001)
                                     time.sleep(1)
                             except:pass
                     except:continue
-                elif str(jc) == 'gr':
-                    try:
-                        jobgr = requests.get(f'https://traodoisub.com/api/?fields=group&access_token={token_tds}').json()
-                        if 'error' in jobgr:pass
-                        for i in range(len(jobgr)):
-                            try:
-                                id = jobgr[i]['id']
-                                headers = {
-                                    'authority': 'mbasic.facebook.com',
-                                    'scheme': 'https',
-                                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                                    'accept-language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
-                                    'cookie': cookie,
-                                    'sec-ch-ua': '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
-                                    'sec-ch-ua-mobile': '?0',
-                                    'sec-ch-ua-platform': '"Windows"',
-                                    'sec-fetch-dest': 'document',
-                                    'sec-fetch-mode': 'navigate',
-                                    'sec-fetch-site': 'none',
-                                    'sec-fetch-user': '?1',
-                                    'upgrade-insecure-requests': '1',
-                                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-                                }
-                                url = requests.get(f'https://mbasic.facebook.com/{id}',headers=headers).url
-                                step1 = requests.get(url,headers=headers).text
-                                step2 = re.findall('/a/group/join/?.*?"',step1)
-                                if step2 ==[]:pass
-                                else:
-                                    step3 = step2[0].replace('amp;','').replace('"','')
-                                    fb_dtsg = step1.split('name="fb_dtsg" value="')[1].split('"')[0]
-                                    jazoest = step1.split('name="jazoest" value="')[1].split('"')[0]
-                                    _data = {"fb_dtsg": fb_dtsg,"jazoest": jazoest}
-                                    _joingroup = requests.post(f'https://mbasic.facebook.com{step3}',headers=headers,data=_data).text
-                                get_xu = requests.get(f'https://traodoisub.com/api/coin/?type=GROUP&id={id}&access_token={token_tds}').json()
-                                if 'success' in get_xu:
-                                    count += 1
-                                    timem = datetime.now().strftime("%H:%M:%S")
-                                    xucong = str(get_xu['data']['msg'])
-                                    xutong = str(get_xu['data']['xu'])
-                                    print(f'| {count} | {timem} | GROUP | {id} | {xucong} | {xutong} |')
-                                    if count > 0 and count % chuyen == 0:
-                                        continue
-                                else:
-                                    print(f'| X | {timem} | GROUP | {id} | {xutong} |', end='\r')
-                                for i in range(delay,0,-1):
-                                    print(f'Làm Job Tiếp Theo Sau {i} Giây', end='\r')
-                                    time.sleep(1)
-                            except:pass
-                    except:pass  
-                elif str(jc)=='camxuc':
+                elif str(jc)=='cx':
                     try:
                         jobcx = requests.get(f'https://traodoisub.com/api/?fields=reaction&access_token={token_tds}').json()
                         if 'error' in jobcx:continue
@@ -181,13 +138,197 @@ if __name__=="__main__":
                                     timem = datetime.now().strftime("%H:%M:%S")
                                     xucong = str(get_xu['data']['msg'])
                                     xutong = str(get_xu['data']['xu'])
-                                    print(f'| {count} | {timem} | {typee} | {id} | {xucong} | {xutong} |')
-                                    if count > 0 and count % chuyen == 0:
-                                        continue
-                                else:
-                                    print(f'| X | {timem} | {typee} | {id} | {xutong} |', end='\r')
+                                    Write.Print(f'| {count} | {timem} | {typee} | {id} | {xucong} | {xutong} |\n',Colors.green_to_white,interval=0.0001)
+                                    if count >= chuyen:
+                                        break
                                 for i in range(delay,0,-1):
-                                    print(f'Làm Job Tiếp Theo Sau {i} Giây', end='\r')
+                                    Write.Print(f'Làm Job Tiếp Theo Sau {i} Giây \r',Colors.green_to_white,interval=0.0001)
                                     time.sleep(1)
                             except:pass
                     except:continue
+                elif str(jc)=='follow':
+                    try:
+                        jobfollow = requests.get(f'https://traodoisub.com/api/?fields=follow&access_token={token_tds}').json()
+                        if 'error' in jobfollow:continue
+                        for i in range(int(len(jobfollow))):
+                            try:
+                                id = str(jobfollow[i]['id'])
+                                host = 'https://mbasic.facebook.com/profile.php?id='
+                                head_job = {'cookie':ck}
+                                url = host+str(id)
+                                a = requests.get(url=url, headers=head_job).text
+                                b = re.findall('/a/subscribe.php?.*?"', a)
+                                if b == []:continue
+                                else:
+                                    c = b[0].replace('amp;','').replace('"','')
+                                    url = (host+c).replace('/profile.php?id=','')
+                                    done = requests.get(url=url, headers=head_job)
+                                get_xu = requests.get(f'https://traodoisub.com/api/coin/?type=follow&id={id}&access_token={token_tds}').json()
+                                if str(get_xu['success'])=='200':
+                                    count += 1
+                                    timem = datetime.now().strftime("%H:%M:%S")
+                                    xucong = str(get_xu['data']['msg'])
+                                    xutong = str(get_xu['data']['xu'])
+                                    Write.Print(f'| {count} | {timem} | FOLLOW | {id} | {xucong} | {xutong} |\n',Colors.green_to_white,interval=0.0001)
+                                    if count >= chuyen:
+                                        break
+                                for i in range(delay,0,-1):
+                                    Write.Print(f'Làm Job Tiếp Theo Sau {i} Giây \r',Colors.green_to_white,interval=0.0001)
+                                    time.sleep(1)
+                            except:pass
+                    except:continue
+                elif str(jc) == 'page':
+                    try:
+                        jobpage = requests.get(f'https://traodoisub.com/api/?fields=page&access_token={token_tds}').json()
+                        if 'error' in jobpage:continue
+                        for i in range(int(len(jobpage))):
+                            try:
+                                id = jobpage[i]['id']
+                                host = 'https://mbasic.facebook.com/profile.php?id='
+                                head_job = {'cookie':ck}
+                                url = host+str(id)
+                                a = requests.get(url=url, headers=head_job).text
+                                b = re.findall('/a/page/join/?.*?"', a)
+                                if b == []:continue
+                                else:
+                                    c = b[0].replace('amp;','').replace('"','')
+                                    url = (host+c).replace('/profile.php?id=','')
+                                    donelp = requests.get(url=url, headers=head_job)
+                                    get_xu = requests.get(f'https://traodoisub.com/api/coin/?type=PAGE&id={id}&access_token={token_tds}').json()
+                                if 'success' in get_xu:
+                                    count += 1
+                                    timem = datetime.now().strftime("%H:%M:%S")
+                                    xucong = str(get_xu['data']['msg'])
+                                    xutong = str(get_xu['data']['xu'])
+                                    Write.Print(f'| {count} | {timem} | LIKEPAGE | {id} | {xucong} | {xutong} |\n',Colors.green_to_white,interval=0.005)
+                                    if count >= chuyen:
+                                        break
+                                for i in range(delay,0,-1):
+                                    Write.Print(f'Làm Job Tiếp Theo Sau {i} Giây \r',Colors.green_to_blue,interval=0.005)
+                                    time.sleep(1)
+                            except:pass
+                    except:continue
+                elif str(jc) == 'share':
+                    try:
+                        jobs = requests.get(f'https://traodoisub.com/api/?fields=share&access_token={token_tds}').json()
+                        if 'error' in jobs:pass
+                        for i in range(len(jobs)):
+                            try:
+                                id = jobs[i]['id']
+                                host = 'https://mbasic.facebook.com/'
+                                msg = ''
+                                headers = {
+                                    'authority': 'mbasic.facebook.com',
+                                    'scheme': 'https',
+                                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                                    'accept-language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
+                                    'cookie':ck,
+                                    'sec-ch-ua': '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
+                                    'sec-ch-ua-mobile': '?0',
+                                    'sec-ch-ua-platform': '"Windows"',
+                                    'sec-fetch-dest': 'document',
+                                    'sec-fetch-mode': 'navigate',
+                                    'sec-fetch-site': 'none',
+                                    'sec-fetch-user': '?1',
+                                    'upgrade-insecure-requests': '1',
+                                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+                                }
+                                url = requests.get(host+id,headers=headers).url
+                                share = requests.get(url,headers=headers).text
+                                _find = re.findall('composer/mbasic/.*?"',share)
+                                if _find == []:pass
+                                else:
+                                    data = _find[0].replace('amp;','').replace('"','')
+                                    done1 = requests.get(host+data,headers=headers).text
+                                    fb_dtsg = done1.split('name="fb_dtsg" value="')[1].split('"')[0]
+                                    jazoest = done1.split('name="jazoest" value="')[1].split('"')[0]
+                                    target = done1.split('name="target" value="')[1].split('"')[0]
+                                    csid = done1.split('name="csid" value="')[1].split('"')[0]
+                                    privacyx = done1.split('name="privacyx" value="')[1].split('"')[0]
+                                    sid = done1.split('name="sid" value="')[1].split('"')[0]
+                                    data = {
+                                        "fb_dtsg": fb_dtsg,
+                                        "jazoest": jazoest,
+                                        "at": "",
+                                        "target": target,
+                                        "csid": csid,
+                                        "c_src": "share",
+                                        "referrer": "feed",
+                                        "ctype": "advanced",
+                                        "cver": "amber_share",
+                                        "users_with": "",
+                                        "album_id": "",
+                                        "waterfall_source": "advanced_composer_timeline",
+                                        "privacyx": privacyx,
+                                        "appid": "0",
+                                        "sid": sid,
+                                        "linkUrl": "",
+                                        "m": "self",
+                                        "xc_message": msg,
+                                        "view_post": "Chia sẻ",
+                                        "shared_from_post_id": sid,
+                                    }
+                                    share2 = done1.split('action="/composer/mbasic/?csid=')[1].split('"')[0]
+                                    share3 = share2.replace('amp;','')
+                                    _share = requests.post(f'https://mbasic.facebook.com/composer/mbasic/?csid={share3}',headers=headers,data=data).text
+                                get_xu = requests.get(f'https://traodoisub.com/api/coin/?type=SHARE&id={id}&access_token={token_tds}').json()
+                                if 'success' in get_xu:
+                                    count += 1
+                                    timem = datetime.now().strftime("%H:%M:%S")
+                                    xucong = str(get_xu['data']['msg'])
+                                    xutong = str(get_xu['data']['xu'])
+                                    Write.Print(f'| {count} | {timem} | SHARE | {id} | {xucong} | {xutong} |\n',Colors.green_to_white,interval=0.005)
+                                    if count >= chuyen:
+                                        break
+                                for i in range(delay,0,-1):
+                                    Write.Print(f'Làm Job Tiếp Theo Sau {i} Giây \r',Colors.green_to_blue,interval=0.005)
+                                    time.sleep(1)
+                            except:pass
+                    except:pass
+                elif str(jc) == 'gr':
+                    try:
+                        jobgr = requests.get(f'https://traodoisub.com/api/?fields=group&access_token={token_tds}').json()
+                        if 'error' in jobgr:pass
+                        for i in range(len(jobgr)):
+                            try:
+                                id = jobgr[i]['id']
+                                headers = {
+                                    'authority': 'mbasic.facebook.com',
+                                    'scheme': 'https',
+                                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                                    'accept-language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
+                                    'cookie':ck,
+                                    'sec-ch-ua': '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
+                                    'sec-ch-ua-mobile': '?0',
+                                    'sec-ch-ua-platform': '"Windows"',
+                                    'sec-fetch-dest': 'document',
+                                    'sec-fetch-mode': 'navigate',
+                                    'sec-fetch-site': 'none',
+                                    'sec-fetch-user': '?1',
+                                    'upgrade-insecure-requests': '1',
+                                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+                                }
+                                url = requests.get(f'https://mbasic.facebook.com/{id}',headers=headers).url
+                                step1 = requests.get(url,headers=headers).text
+                                step2 = re.findall('/a/group/join/?.*?"',step1)
+                                if step2 ==[]:pass
+                                else:
+                                    step3 = step2[0].replace('amp;','').replace('"','')
+                                    fb_dtsg = step1.split('name="fb_dtsg" value="')[1].split('"')[0]
+                                    jazoest = step1.split('name="jazoest" value="')[1].split('"')[0]
+                                    _data = {"fb_dtsg": fb_dtsg,"jazoest": jazoest}
+                                    _joingroup = requests.post(f'https://mbasic.facebook.com{step3}',headers=headers,data=_data).text
+                                get_xu = requests.get(f'https://traodoisub.com/api/coin/?type=GROUP&id={id}&access_token={token_tds}').json()
+                                if 'success' in get_xu:
+                                    count += 1
+                                    timem = datetime.now().strftime("%H:%M:%S")
+                                    xucong = str(get_xu['data']['msg'])
+                                    xutong = str(get_xu['data']['xu'])
+                                    Write.Print(f'| {count} | {timem} | GROUP | {id} | {xucong} | {xutong} |\n',Colors.green_to_white,interval=0.005)
+                                    if count >= chuyen:
+                                        break
+                                for i in range(delay,0,-1):
+                                    Write.Print(f'Làm Job Tiếp Theo Sau {i} Giây \r',Colors.green_to_blue,interval=0.005)
+                                    time.sleep(1)
+                            except:pass
+                    except:pass
