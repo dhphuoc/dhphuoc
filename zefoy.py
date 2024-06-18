@@ -1,36 +1,21 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import os
-from os import system, name as os_name, get_terminal_size
-from re import findall
-from requests import post, get
-from random import choice
-from io import BytesIO
+import re, requests, base64, os
 from bs4 import BeautifulSoup
-from selenium.webdriver.common.action_chains import ActionChains
-from base64 import b64decode, b64encode
+from selenium import webdriver
+from PIL import Image
 from time import sleep
+from io import BytesIO
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
-from PIL import ImageGrab, Image
 from selenium.webdriver.support.ui import WebDriverWait
-from threading import Thread
 from selenium.webdriver.support import expected_conditions as EC
-import requests
-import re
-import base64
-
+os.system("cls" if os.name == "nt" else "clear")
 def parse_time(text):
-
     minutes = re.search(r'(\d+) minute\(s\)', text)
     seconds = re.search(r'(\d+) seconds', text)
     minutes = int(minutes.group(1)) if minutes else 0
     seconds = int(seconds.group(1)) if seconds else 0
     total_seconds = minutes * 60 + seconds
-    sleep(total_seconds)
-            
+    sleep(total_seconds)    
 
 def get_captcha():
     js_script = '''
@@ -43,8 +28,6 @@ def get_captcha():
         return canvas.toDataURL('image/png').substring(22);  // Loại bỏ phần đầu "data:image/png;base64,"
     '''
     image_base64 = driver.execute_script(js_script)
-
-    # Giải mã base64 và lưu ảnh
     image_data = base64.b64decode(image_base64)
     image_name = 'captcha.png'
     image = Image.open(BytesIO(image_data))
@@ -62,354 +45,171 @@ def slove():
             pass
 
 chrome_options = Options()
-
 chrome_options.add_argument("--window-size=600,900")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
-#chrome_options.add_argument("--headless=new")
 chrome_options.add_argument("--display=:1")
 driver = webdriver.Chrome(options=chrome_options)
-
 driver.get("https://zefoy.com/")
-while True:
-    html = driver.page_source
+os.system("cls" if os.name == "nt" else "clear")
+def loggin():
     while True:
-        if 'Enter the word' in html:
-            break
-        else:
-            sleep(2)
-            
-            tieu_de = driver.title
-            if tieu_de != 'Zefoy':
-                pass
-    sleep(0.3)
-    get_captcha()
-
-    
-    captcha_text = slove()
-    if captcha_text == '':
-        captcha_text = 'dhphuoc'
-    sleep(1)
-    
-    ## điền thồng tin
-    WebDriverWait(driver, 100).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.noscriptcheck > div.ua-check > form > div > div > div > input"))
-    )
-    js_script = '''
-    document.querySelector("body > div.noscriptcheck > div.ua-check > form > div > div > div > input").value = arguments[0];
-    '''
-    driver.execute_script(js_script, captcha_text)
-    ##
-    
-    #document.querySelector("body > div.noscriptcheck > div.ua-check > form > div > div > div > div > button")
-    WebDriverWait(driver, 100).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.noscriptcheck > div.ua-check > form > div > div > div > div > button"))
-    )
-
-    # Sử dụng JavaScript để đặt giá trị và gửi form
-    js_script = '''
-    document.querySelector("body > div.noscriptcheck > div.ua-check > form > div > div > div > div > button").click();
-    '''
-    driver.execute_script(js_script)
-
-    while True:
-        sleep(0.5)
         html = driver.page_source
-        if 'Captcha code is incorrect.' in html:  
-            print('GIẢI CAPTCHA SAI !!! ')
-            driver.refresh()
-            hvthu = 'off'
+        while True:
+            if 'Enter the word' in html:
+                break
+            else:
+                sleep(2)
+                
+                tieu_de = driver.title
+                if tieu_de != 'Zefoy':
+                    pass
+        sleep(0.3)
+        get_captcha()
+        captcha_text = slove()
+        if captcha_text == '':
+            captcha_text = 'dhphuoc'
+        sleep(1)
+        WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.noscriptcheck > div.ua-check > form > div > div > div > input")))
+        js_script = '''
+        document.querySelector("body > div.noscriptcheck > div.ua-check > form > div > div > div > input").value = arguments[0];
+        '''
+        driver.execute_script(js_script, captcha_text)
+        WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.noscriptcheck > div.ua-check > form > div > div > div > div > button")))
+        js_script = '''
+        document.querySelector("body > div.noscriptcheck > div.ua-check > form > div > div > div > div > button").click();
+        '''
+        driver.execute_script(js_script)
+        while True:
+            sleep(0.5)
+            html = driver.page_source
+            if 'Captcha code is incorrect.' in html:  
+                print('GIẢI CAPTCHA SAI !!! ')
+                driver.refresh()
+                hvthu = 'off'
+                break
+            elif 'button class="btn btn-primary rounded-0 t-views-button"><i class="fa fa-arrow-right fa-lg"></i></button>' in html:
+                print('GIẢI CAPTCHA THÀNH CÔNG ')
+                hvthu = 'on'
+                break
+            else:
+                pass
+        if hvthu == 'on':
             break
-        elif 'button class="btn btn-primary rounded-0 t-views-button"><i class="fa fa-arrow-right fa-lg"></i></button>' in html:
-            print('GIẢI CAPTCHA THÀNH CÔNG ')
-            hvthu = 'on'
-            break
-        else:
-            pass
-    if hvthu == 'on':
-        break
-
-
-soup = BeautifulSoup(html, 'html.parser')
-divs = soup.find_all('div', class_='col-sm-4 col-xs-12 p-1 colsmenu')
-titles = []
-for div in divs:
-    h5_tag = div.find('h5', class_='card-title')
-    print(h5_tag.text.strip())
+    soup = BeautifulSoup(html, 'html.parser')
+    divs = soup.find_all('div', class_='col-sm-4 col-xs-12 p-1 colsmenu')
+    titles = []
+    for div in divs:
+        h5_tag = div.find('h5', class_='card-title')
+        print(h5_tag.text.strip())
+        try:
+            small_tag = div.find('small', class_='badge badge-round badge-danger d-sm-inline-block')
+            print(small_tag.text)
+        except:
+            small_tag = div.find('small', class_='badge badge-round badge-warning d-sm-inline-block')
+            print(small_tag.text)
+    sleep(1)
     try:
-        small_tag = div.find('small', class_='badge badge-round badge-danger d-sm-inline-block')
-        print(small_tag.text)
-    except:
-        small_tag = div.find('small', class_='badge badge-round badge-warning d-sm-inline-block')
-        print(small_tag.text)
-sleep(1)
-print("1=> VIEW , 2=>   SHARE")
-chon = int(input("vui lòng nhập số: "))
-if chon ==1:
-    try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(9) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button"))
-        )
-
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(9) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button")))
         js_script = '''
         document.querySelector("body > div:nth-child(9) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button").click();
         '''
         driver.execute_script(js_script)
     except:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(8) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button"))
-        )
-        js_script = '''
-        document.querySelector("body > div:nth-child(8) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button").click();
-        '''
-        driver.execute_script(js_script)
-
+        try:
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(8) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button")))
+            js_script = '''
+            document.querySelector("body > div:nth-child(8) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button").click();
+            '''
+            driver.execute_script(js_script)
+        except:
+            try:
+                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(11) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button")))
+                js_script = '''
+                document.querySelector("body > div:nth-child(11) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button").click();
+                '''
+                driver.execute_script(js_script)
+            except:
+                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(10) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button")))
+                js_script = '''
+                document.querySelector("body > div:nth-child(10) > div > div.noscriptcheck > div > div > div:nth-child(6) > div > button").click();
+                '''
+                driver.execute_script(js_script)
     print('ĐÃ MỞ VIEW !!! ')
-    sleep(1)
-    video = input("nhập link video: ")
-    while True:
-        ## input video
-        #document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > input")
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > input"))
-        )
-        js_script = '''
-        document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > input").value = arguments[0];
-        '''
-        driver.execute_script(js_script, video)
-        ##
-        
-        ## click search
-        #document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div")
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button"))
-        )
-        js_script = '''
-        document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button").click();
-        '''
-        driver.execute_script(js_script)
-        ##
-        try:
-            while True:
-                try:
-                    #sleep(3)
-                    while True:
-                        WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span.br.views-countdown'))
-                        )
-                        html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span.br.views-countdown").outerHTML')
-                        pattern = r'<span class="br views-countdown" style="text-align:center;color:#337ab7;font-weight:bold;font-size:115%;">(.*?)</span>'
-            
-                        # Use re.search() to find the text
-                        match = re.search(pattern, html)
-            
-                        # Extract the text if a match is found
-                        if match:
-                            extracted_text = match.group(1)
-            
-                        # Văn bản đầu vào
-                        text = extracted_text
-                        if text.strip() != 'Checking Timer...' and text.strip() != 'Next Submit: READY....!':
-                            break
-                    print(text)
-                    
-                    # Gọi hàm parse_time với văn bản đầu vào
-                    parse_time(text)
-                    sleep(1)
-            
-                    WebDriverWait(driver, 100).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button"))
-                    )
-            
-                    # Sử dụng JavaScript để đặt giá trị và gửi form
-                    js_script = '''
-                    document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button").click();
-                    '''
-                    driver.execute_script(js_script)
-                    sleep(3)
-                    WebDriverWait(driver, 100).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button'))
-                    )
-                    js_script = '''
-                    document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button").click();
-                    '''
-                    driver.execute_script(js_script)
-                    #sleep(5)
-                    try:
-                        WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)'))
-                        )
-                        html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)").outerHTML')
-                        pattern = r'<span style="font-size:110%;font-weight:bold;font-family:Arial, Helvetica, sans-serif;text-align:center;color:green;">(.*?)</span>'
-            
-                        # Use re.search() to find the text
-                        match = re.search(pattern, html)
-            
-                        # Extract the text if a match is found
-                        if match:
-                            view = match.group(1)
-                        print(view)
-                    except:
-                        pass
-                    sleep(5)
-                    
-                except:
-                    WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button'))
-                    )
-                    js_script = '''
-                    document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button").click();
-                    '''
-                    driver.execute_script(js_script)
-                    #sleep(5)
-                    try:
-                        WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)'))
-                        )
-                        html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)").outerHTML')
-                        pattern = r'<span style="font-size:110%;font-weight:bold;font-family:Arial, Helvetica, sans-serif;text-align:center;color:green;">(.*?)</span>'
-            
-                        # Use re.search() to find the text
-                        match = re.search(pattern, html)
-            
-                        # Extract the text if a match is found
-                        if match:
-                            view = match.group(1)
-                        print(view)
-                    except:
-                        pass
-                    sleep(5)
-        except:
-            pass
-elif chon ==2:
+loggin()
+sleep(1)
+video = input('Nhập Link Video: ')
+while True:
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > input")))
+    js_script = '''
+    document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > input").value = arguments[0];
+    '''
+    driver.execute_script(js_script, video)
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button")))
+    js_script = '''
+    document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button").click();
+    '''
+    driver.execute_script(js_script)
     try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(9) > div > div.noscriptcheck > div > div > div:nth-child(7) > div > button"))
-        )
-
-        js_script = '''
-        document.querySelector("body > div:nth-child(9) > div > div.noscriptcheck > div > div > div:nth-child(7) > div > button").click();
-        '''
-        driver.execute_script(js_script)
-    except:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div:nth-child(8) > div > div.noscriptcheck > div > div > div:nth-child(7) > div > button"))
-        )
-
-        # nhấn vào share
-        js_script = '''
-        document.querySelector("body > div:nth-child(8) > div > div.noscriptcheck > div > div > div:nth-child(7) > div > button").click();
-        '''
-        driver.execute_script(js_script)
-
-    print('ĐÃ MỞ SHARE !!! ')
-    sleep(1)
-    video = input("nhập link video: ")
-    while True:
-        ## input video
-        
-        #document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > input")
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > input"))
-        )
-        js_script = '''
-        document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > input").value = arguments[0];
-        '''
-        driver.execute_script(js_script, video)
-        ##
-        
-        ## click search
-        #document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > div > button")
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > div > button"))
-        )
-        js_script = '''
-        document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > div > button").click();
-        '''
-        driver.execute_script(js_script)
-        ##
-        try:
-            while True:
+        while True:
+            try:
+                while True:
+                    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span.br.views-countdown')))
+                    html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span.br.views-countdown").outerHTML')
+                    pattern = r'<span class="br views-countdown" style="text-align:center;color:#337ab7;font-weight:bold;font-size:115%;">(.*?)</span>'
+                    match = re.search(pattern, html)
+                    if match:
+                        extracted_text = match.group(1)
+                    text = extracted_text
+                    if text.strip() != 'Checking Timer...' and text.strip() != 'Next Submit: READY....!':
+                        break
+                print(text)
+                parse_time(text)
+                sleep(1)
+                WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button")))
+                js_script = '''
+                document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-views-menu > div > form > div > div > button").click();
+                '''
+                driver.execute_script(js_script)
+                sleep(3)
+                WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button')))
+                js_script = '''
+                document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button").click();
+                '''
+                driver.execute_script(js_script)
                 try:
-                    #sleep(3)
-                    while True:
-                        WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span.br.share-countdown'))
-                        )
-                        html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span.br.share-countdown").outerHTML')
-                        pattern = r'<span class="br share-countdown" style="text-align:center;color:#337ab7;font-weight:bold;font-size:115%;">(.*?)</span>'
-            
-                        # Use re.search() to find the text
-                        match = re.search(pattern, html)
-                        if match:
-                            extracted_text = match.group(1)
-            
-                        # Văn bản đầu vào
-                        text = extracted_text
-                        if text.strip() != 'Checking Timer...' and text.strip() != 'Next Submit: READY....!':
-                            break
-                    print(text)
-                    
-                    # Gọi hàm parse_time với văn bản đầu vào
-                    parse_time(text)
-                    sleep(1)
-            #click lại tìm kiếm
-                    WebDriverWait(driver, 100).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > div > button"))
-                    )
-                    js_script = '''
-                    document.querySelector("body > div.col-sm-5.col-xs-12.p-1.container.t-shares-menu > div > form > div > div > button").click();
-                    '''
-                    driver.execute_script(js_script)
-                    sleep(3)
-                    WebDriverWait(driver, 100).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > div.row.text-light.d-flex.justify-content-center > div > form > button'))
-                    )
-                    js_script = '''
-                    document.querySelector("#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > div.row.text-light.d-flex.justify-content-center > div > form > button").click();
-                    '''
-                    driver.execute_script(js_script)
-                    #sleep(5)
-                    try:
-                        #document.querySelector("#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > div.row.text-light.d-flex.justify-content-center > div > form > button")
-                        WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > span:nth-child(3)'))
-                        )
-                        html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > span:nth-child(3)").outerHTML')
-                        pattern = r'<span style="font-size:110%;font-weight:bold;font-family:Arial, Helvetica, sans-serif;text-align:center;color:green;">(.*?)</span>'
-            
-                        # Use re.search() to find the text
-                        match = re.search(pattern, html)
-                        if match:
-                            view = match.group(1)
-                        print(view)
-                    except:
-                        pass
-                    sleep(5)
-                    
+                    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)')))
+                    html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)").outerHTML')
+                    pattern = r'<span style="font-size:110%;font-weight:bold;font-family:Arial, Helvetica, sans-serif;text-align:center;color:green;">(.*?)</span>'
+                    match = re.search(pattern, html)
+                    if match:
+                        view = match.group(1)
+                    print(view)
                 except:
-                    WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > div.row.text-light.d-flex.justify-content-center > div > form > button'))
-                    )
-                    js_script = '''
-                    document.querySelector("#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > div.row.text-light.d-flex.justify-content-center > div > form > button").click();
-                    '''
-                    driver.execute_script(js_script)
-                    #sleep(5)
-                    try:
-                        WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > span:nth-child(3)'))
-                        )
-                        html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xsb3dlcnNfdGlrdG9s > span:nth-child(3)").outerHTML')
-                        pattern = r'<span style="font-size:110%;font-weight:bold;font-family:Arial, Helvetica, sans-serif;text-align:center;color:green;">(.*?)</span>'
-                        match = re.search(pattern, html)
-                        if match:
-                            view = match.group(1)
-                        print(view)
-                    except:
-                        pass
-                    sleep(5)
+                    pass
+                sleep(5)
+                
+            except:
+                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button')))
+                js_script = '''
+                document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div.row.text-light.d-flex.justify-content-center > div > form > button").click();
+                '''
+                driver.execute_script(js_script)
+                try:
+                    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)')))
+                    html = driver.execute_script('return document.querySelector("#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > span:nth-child(3)").outerHTML')
+                    pattern = r'<span style="font-size:110%;font-weight:bold;font-family:Arial, Helvetica, sans-serif;text-align:center;color:green;">(.*?)</span>'
+                    match = re.search(pattern, html)
+                    if match:
+                        view = match.group(1)
+                    print(view)
+                except:
+                    pass
+                sleep(5)
+    except:
+        try:
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#c2VuZC9mb2xeb3dlcnNfdGlrdG9V > div')))
+            driver.refresh()
+            loggin()
         except:
             pass
-else:
-    print("chọn sai mù à em ")
